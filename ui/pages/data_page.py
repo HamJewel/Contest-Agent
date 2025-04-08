@@ -42,6 +42,8 @@ def init():
                 e2.info('获取数据中...', icon='⏳')
                 ses.file_clt = create_file_clt()
                 ses.text_clt = create_text_clt()
+                ses.file_clt.load()
+                ses.text_clt.load()
                 ses.file_data = get_file_data()
                 e2.empty()
                 e2.success('已获取数据', icon='✅')

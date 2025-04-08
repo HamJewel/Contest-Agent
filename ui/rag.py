@@ -128,8 +128,8 @@ def retrieval_texts(query, max_ret=5, n_probe=10):
 def insert_file_clt(file_names: list[str]):
     date = int(time())
     n = len(file_names)
-    result = ses.file_clt.insert([file_names, [date] * n, np.zeros((n, 1))])
-    print(f"成功插入 {result.insert_count} 条记录到集合 '{ses.file_clt.name}'")
+    results = ses.file_clt.insert([file_names, [date] * n, np.zeros((n, 1))])
+    print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.file_clt.name}'")
     ses.file_clt.flush()
 
 
@@ -143,8 +143,8 @@ def insert_text_clt(file_names: list[str], file_paths: list[str]):
     for i in range(0, n, emb_size):
         j = i + emb_size
         embeddings = embed_texts(texts[i:j])
-        result = ses.text_clt.insert([ids[i:j], files[i:j], texts[i:j], embeddings])
-        print(f"成功插入 {result.insert_count} 条记录到集合 '{ses.text_clt.name}'")
+        results = ses.text_clt.insert([ids[i:j], files[i:j], texts[i:j], embeddings])
+        print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.text_clt.name}'")
     ses.text_clt.flush()
 
 
@@ -158,8 +158,9 @@ def update_file_clt(file_names: list[str]):
     n = len(file_names)
     ses.file_clt.load()
     results = ses.file_clt.delete(expr=f'file in {file_names}')
-    print(f"成功删除 {results.delete_count} 条记录从集合 '{ses.text_clt.name}'")
-    ses.file_clt.insert([file_names, [date] * n, np.zeros((n, 1))])
+    print(f"成功删除 {results.delete_count} 条记录从集合 '{ses.file_clt.name}'")
+    results = ses.file_clt.insert([file_names, [date] * n, np.zeros((n, 1))])
+    print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.file_clt.name}'")
     ses.file_clt.flush()
 
 
@@ -170,11 +171,8 @@ def update_text_clt(file_name: str, file_path: str):
     new_ids = [hash_string(text) for text in texts]
     id2text = {id: text for id, text in zip(new_ids, texts)}
     new_ids = set(new_ids)
-    print('loading')
     ses.text_clt.load()
-    print('loaded')
     results = ses.text_clt.query(expr=f'file == "{file_name}"', output_fields=['id'])
-    print(results)
     pre_ids = set([res['id'] for res in results])
     del_ids = list(pre_ids - new_ids)  # 删除更新后不存在的记录
     add_ids = list(new_ids - pre_ids)  # 添加更新后新增的记录
@@ -191,8 +189,8 @@ def update_text_clt(file_name: str, file_path: str):
     for i in range(0, n, emb_size):
         j = i + emb_size
         embeddings = embed_texts(texts[i:j])
-        result = ses.text_clt.insert([add_ids[i:j], files[i:j], texts[i:j], embeddings])
-        print(f"成功插入 {result.insert_count} 条记录到集合 '{ses.text_clt.name}'")
+        results = ses.text_clt.insert([add_ids[i:j], files[i:j], texts[i:j], embeddings])
+        print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.text_clt.name}'")
     ses.text_clt.flush()
 
 
