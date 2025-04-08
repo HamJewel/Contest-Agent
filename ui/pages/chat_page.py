@@ -3,6 +3,10 @@ from ui.rag import *
 reasoning_content, answer_content = [], []
 if 'messages' not in ses:
     ses.messages = []
+if 'max_ret' not in ses:
+    ses.max_ret = 5
+if 'n_probe' not in ses:
+    ses.n_probe = 10
 llm = LLM_names[0]
 
 
@@ -104,8 +108,8 @@ with st.sidebar:
     llm = st.selectbox('大模型列表', LLM_names, key='llm')
     model = LLMs[llm]['model']
     reasoning = LLMs[llm]['reasoning']
-    max_ret = st.number_input('最大检索信息数', min_value=1, value=5, key='max_ret')
-    n_probe = st.number_input('搜索聚类数', min_value=1, value=10, key='n_probe')
+    max_ret = st.number_input('最大检索信息数', min_value=1, key='max_ret')
+    n_probe = st.number_input('搜索聚类簇数', min_value=1, key='n_probe')
 
 write_messages()
 
