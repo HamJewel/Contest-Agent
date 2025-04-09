@@ -3,6 +3,59 @@ from ui.rag import *
 empty_file_data = pd.DataFrame(columns=['编号', '加载日期', '文件名称'])
 
 
+def welcome():
+    st.markdown("""
+    <style>
+        @keyframes floatIn {
+            0% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            80% {
+                transform: translateY(10px);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin: 150px 0 20px 0;
+            animation: floatIn 1s ease-out forwards;
+        }
+        .big-emoji {
+            font-size: 100px;
+            margin-bottom: 5px;
+            animation: bounce 2s infinite;
+        }
+        .welcome-text {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+
+    <div class="welcome-container">
+        <div class="big-emoji">🔗</div>
+        <div class="welcome-text">请先初始化数据库🗃️</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
 def get_file_data():
     ses.file_clt.load()
     results = ses.file_clt.query(expr='date > 0', output_fields=['date', 'file'])
@@ -18,15 +71,18 @@ def get_file_data():
 
 def init():
     with st.sidebar:
-        button = st.button('初始化数据库', type='primary', icon='⚙️', use_container_width=True)
+        button = st.button('初始化数据库', type='primary', icon='🔗', use_container_width=True)
         e1 = st.empty()
         e2 = st.empty()
+        flag = 0
         if is_connected():
             e1.success('已连接数据库', icon='✅')
+            flag += 1
         else:
             e1.warning('未连接数据库', icon='⚠️')
-        if 'text_clt' in ses:
+        if 'file_clt' in ses and 'text_clt' in ses:
             e2.success('已获取数据', icon='✅')
+            flag += 1
         else:
             e2.warning('未获取数据', icon='⚠️')
         if button:
@@ -37,6 +93,7 @@ def init():
             e1.empty()
             if not is_connected():
                 e1.error('连接失败', icon='❌')
+                return False
             else:
                 e1.success('已连接数据库', icon='✅')
                 e2.info('获取数据中...', icon='⏳')
@@ -48,9 +105,12 @@ def init():
                 e2.empty()
                 e2.success('已获取数据', icon='✅')
                 return True
+        return flag == 2
 
 
-init()
+if not init():
+    welcome()
+    st.stop()
 col1, col2 = st.columns([2, 1])
 col1.write('**已加载文件**')
 data_holder = col1.empty()

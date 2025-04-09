@@ -33,16 +33,16 @@ def welcome():
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin: 100px 0 20px 0;
+            margin: 150px 0 20px 0;
             animation: floatIn 1s ease-out forwards;
         }
         .big-emoji {
-            font-size: 80px;
-            margin-bottom: 15px;
+            font-size: 100px;
+            margin-bottom: 5px;
             animation: bounce 2s infinite;
         }
         .welcome-text {
-            font-size: 20px;
+            font-size: 25px;
             font-weight: bold;
         }
 
