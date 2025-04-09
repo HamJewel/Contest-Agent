@@ -70,10 +70,12 @@ def reasoning_stream():
 
 def write_reasoning():
     status = st.status('推理过程', expanded=True)
-    status.write_stream(reasoning_stream())
+    holder = status.empty()
+    holder.write_stream(reasoning_stream())
     ses.answer_content = ''.join(ses.answer_content)
-    status.empty()
+    holder.empty()
     status.caption(ses.reasoning_content)
+    status.update(state='complete')
     st.write(ses.answer_content)
 
 
