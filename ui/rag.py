@@ -19,7 +19,7 @@ def load_documents(file_names: list[str], file_paths: list[str]) -> list[Documen
         for doc in docs:
             doc.metadata['file_name'] = name
         all_docs.extend(docs)
-        print(f"已加载: {os.path.basename(path)}")
+        print(f'已加载: {os.path.basename(path)}')
     return all_docs
 
 
@@ -41,12 +41,12 @@ def hash_string(string):
 def connect_to_milvus():
     try:
         connections.connect(alia='default', host='localhost', port=default_server.listen_port)
-        print(f"成功连接到 Milvus 服务器，端口：{default_server.listen_port}")
+        print(f'成功连接到 Milvus 服务器，端口：{default_server.listen_port}')
     except Exception as e:
-        print(f"连接失败，再次尝试中：{e}")
+        print(f'连接失败，再次尝试中：{e}')
         default_server.start()
         connections.connect(alia='default', host='localhost', port=default_server.listen_port)
-        print(f"成功连接到 Milvus 服务器，端口：{default_server.listen_port}")
+        print(f'成功连接到 Milvus 服务器，端口：{default_server.listen_port}')
 
 
 def create_file_clt():
@@ -107,9 +107,15 @@ def retrieval_texts(query, max_ret=5, n_probe=10):
 
 def insert_file_clt(file_names: list[str]):
     date = int(time())
-    n = len(file_names)
-    results = ses.file_clt.insert([file_names, [date] * n, np.zeros((n, 1))])
-    print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.file_clt.name}'")
+    ses.file_clt.load()
+    results = ses.file_clt.query(expr=f'date > 0', output_fields=['file'])
+    pre_files = [res['file'] for res in results]
+    add_files = list(set(file_names) - set(pre_files))
+    n = len(add_files)
+    print(f'需要插入 {n} 条记录到集合 {ses.file_clt.name}')
+    if n > 0:
+        results = ses.file_clt.insert([file_names, [date] * n, np.zeros((n, 1))])
+        print(f'成功插入 {results.insert_count} 条记录到集合 {ses.file_clt.name}')
     ses.file_clt.flush()
 
 
@@ -117,14 +123,23 @@ def insert_text_clt(file_names: list[str], file_paths: list[str]):
     all_docs = load_documents(file_names, file_paths)
     split_docs = split_documents(all_docs)
     files = [doc.metadata['file_name'] for doc in split_docs]
-    texts = [f"《{name.split('.')[0]}》：{doc.page_content}" for name, doc in zip(files, split_docs)]
-    ids = [hash_string(text) for text in texts]
-    n = len(texts)
+    texts = [f"《{file.split('.')[0]}》：{doc.page_content}" for file, doc in zip(files, split_docs)]
+    new_ids = [hash_string(text) for text in texts]
+    id2info = {new_ids[i]: [files[i], texts[i]] for i in range(len(new_ids))}
+    ses.text_clt.load()
+    results = ses.text_clt.query(expr=f'id != "0"', output_fields=['id'])
+    pre_ids = [res['id'] for res in results]
+    add_ids = list(set(new_ids) - set(pre_ids))  # 添加更新后新增的记录
+    n = len(add_ids)
+    print(f'需要插入 {n} 条记录到集合 {ses.text_clt.name}')
     for i in range(0, n, emb_size):
         j = i + emb_size
-        embeddings = get_text_embeddings(texts[i:j])
-        results = ses.text_clt.insert([ids[i:j], files[i:j], texts[i:j], embeddings])
-        print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.text_clt.name}'")
+        ids = add_ids[i:j]
+        files = [id2info[i][0] for i in ids]
+        texts = [id2info[i][1] for i in ids]
+        embeddings = get_text_embeddings(texts)
+        results = ses.text_clt.insert([ids, files, texts, embeddings])
+        print(f'成功插入 {results.insert_count} 条记录到集合 {ses.text_clt.name}')
     ses.text_clt.flush()
 
 
@@ -138,9 +153,9 @@ def update_file_clt(file_names: list[str]):
     n = len(file_names)
     ses.file_clt.load()
     results = ses.file_clt.delete(expr=f'file in {file_names}')
-    print(f"成功删除 {results.delete_count} 条记录从集合 '{ses.file_clt.name}'")
+    print(f'成功删除 {results.delete_count} 条记录从集合 {ses.file_clt.name}')
     results = ses.file_clt.insert([file_names, [date] * n, np.zeros((n, 1))])
-    print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.file_clt.name}'")
+    print(f'成功插入 {results.insert_count} 条记录到集合 {ses.file_clt.name}')
     ses.file_clt.flush()
 
 
@@ -156,10 +171,10 @@ def update_text_clt(file_name: str, file_path: str):
     pre_ids = set([res['id'] for res in results])
     del_ids = list(pre_ids - new_ids)  # 删除更新后不存在的记录
     add_ids = list(new_ids - pre_ids)  # 添加更新后新增的记录
-    print(f"需要删除的记录数：{len(del_ids)}，新增的记录数：{len(add_ids)}")
+    print(f'需要删除的记录数：{len(del_ids)}，新增的记录数：{len(add_ids)}')
     if len(del_ids) > 0:
         results = ses.text_clt.delete(expr=f'id in {del_ids}')
-        print(f"成功删除 {results.delete_count} 条记录从集合 '{ses.text_clt.name}'")
+        print(f'成功删除 {results.delete_count} 条记录从集合 {ses.text_clt.name}')
         ses.text_clt.flush()
     n = len(add_ids)
     if n == 0:
@@ -170,7 +185,7 @@ def update_text_clt(file_name: str, file_path: str):
         j = i + emb_size
         embeddings = get_text_embeddings(texts[i:j])
         results = ses.text_clt.insert([add_ids[i:j], files[i:j], texts[i:j], embeddings])
-        print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.text_clt.name}'")
+        print(f'成功插入 {results.insert_count} 条记录到集合 {ses.text_clt.name}')
     ses.text_clt.flush()
 
 

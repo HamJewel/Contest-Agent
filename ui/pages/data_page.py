@@ -65,7 +65,7 @@ def get_file_data():
         return empty_file_data
     else:
         df = pd.DataFrame(results)
-        df['date'] = df['date'].apply(lambda x: datetime.fromtimestamp(x).strftime("%Y-%m-%d %H:%M:%S"))
+        df['date'] = df['date'].apply(lambda x: datetime.fromtimestamp(x, tz=zone).strftime("%Y-%m-%d %H:%M:%S"))
         df.columns = ['加载日期', '文件名称']
         df.insert(0, '编号', range(1, len(df) + 1))
         return df
@@ -95,7 +95,7 @@ def init():
                 connect_to_milvus()
             except Exception as _:
                 e1.empty()
-                e1.error('连接失败', icon='❌')
+                e1.error('连接失败，请重试', icon='❌')
                 return False
             ses.connected = True
             e1.empty()
@@ -103,8 +103,6 @@ def init():
             e2.info('获取数据中...', icon='⏳')
             ses.file_clt = create_file_clt()
             ses.text_clt = create_text_clt()
-            ses.file_clt.load()
-            ses.text_clt.load()
             ses.file_data = get_file_data()
             e2.empty()
             e2.success('已获取数据', icon='✅')
