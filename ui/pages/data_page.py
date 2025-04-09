@@ -1,6 +1,8 @@
 from ui.rag import *
 
 empty_file_data = pd.DataFrame(columns=['编号', '加载日期', '文件名称'])
+if 'connected' not in ses:
+    ses.connected = False
 
 
 def welcome():
@@ -75,7 +77,7 @@ def init():
         e1 = st.empty()
         e2 = st.empty()
         flag = 0
-        if is_connected():
+        if ses.connected:
             e1.success('已连接数据库', icon='✅')
             flag += 1
         else:
@@ -95,6 +97,7 @@ def init():
                 e1.error('连接失败', icon='❌')
                 return False
             else:
+                ses.connected = True
                 e1.success('已连接数据库', icon='✅')
                 e2.info('获取数据中...', icon='⏳')
                 ses.file_clt = create_file_clt()

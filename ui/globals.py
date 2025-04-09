@@ -18,7 +18,7 @@ import os
 import re
 temp_path = 'temp'
 os.makedirs(temp_path, exist_ok=True)
-Cache_keys = ['messages', 'file_clt', 'text_clt', 'file_data', 'llm', 'max_ret', 'n_probe']
+Cache_keys = ['messages', 'connected', 'file_clt', 'text_clt', 'file_data', 'llm', 'max_ret', 'n_probe']
 LLM_names = ['DeepSeek-V3', 'DeepSeek-R1(支持推理)', 'QwQ-32B(支持推理)', 'Qwen2.5-72B', 'Llama3.3-70B', 'Llama3.1-8B']
 LLMs = {
     'DeepSeek-V3': {'model': 'deepseek-ai/DeepSeek-V3-0324', 'reasoning': False},
