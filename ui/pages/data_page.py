@@ -70,7 +70,7 @@ def get_file_data():
 
 
 def init_state():
-    global e1, e2, init
+    global init, e1, e2
     flag = 0
     if ses.connected:
         e1.success('已连接数据库', icon='✅')
@@ -82,6 +82,7 @@ def init_state():
         flag += 1
     else:
         e2.warning('未获取数据', icon='⚠️')
+
     if init:
         e1.empty()
         e2.empty()
@@ -113,16 +114,18 @@ with st.sidebar:
         os.makedirs(temp_path)
         st.toast('**临时文件清理完成**', icon='🎉')
     init = st.button('初始化数据库', type='primary', icon='🔗', use_container_width=True)
-    with st.status('初始化状态', expanded=True):
-        e1 = st.empty()
-        e2 = st.empty()
+    status = st.status('初始化状态', expanded=True, state='running')
+    e1 = status.empty()
+    e2 = status.empty()
 
 if not init_state():
     welcome()
+    status.update(expanded=True, state='error')
     st.stop()
+status.update(expanded=False, state='complete')
 
 with st.sidebar:
-    clear = st.button('清空数据库', type='primary', icon='🗑️', use_container_width=True)
+    clear = st.button('清空数据库', type='primary', icon='🧹', use_container_width=True)
     st.number_input('文本块长度', min_value=10, key='chunk_size')
     st.number_input('块重叠长度', min_value=0, key='chunk_overlap')
 col1, col2 = st.columns([2, 1])
@@ -137,7 +140,7 @@ fu = col2.file_uploader('📤**上传文件**', ['pdf', 'txt', 'docx'], accept_m
 load = col2.button('添加文件', type='primary', icon='🗃️', disabled=not fu, use_container_width=True)
 col3, col4 = col2.columns([1, 1])
 update = col3.button('更新文件', type='primary', icon='📝', disabled=not fu, use_container_width=True)
-delete = col4.button('删除文件', type='primary', icon='🗃️', disabled=not fu, use_container_width=True)
+delete = col4.button('删除文件', type='primary', icon='🗑️', disabled=not fu, use_container_width=True)
 
 if clear:
     st.toast('**开始清空数据库**', icon='🚀')
