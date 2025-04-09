@@ -49,18 +49,21 @@ def hash_string(string):
 
 def connect_to_milvus():
     # connections.disconnect(alias='default')
-    try:
-        default_server.start()
-    except Exception as e:
-        print(f"首次启动失败，尝试清理后重启: {e}")
-        default_server.cleanup()
-        default_server.start()
-    # 尝试连接到 Milvus 服务器
+    # try:
+    #     default_server.start()
+    # except Exception as e:
+    #     print(f"首次启动失败，尝试清理后重启: {e}")
+    #     default_server.cleanup()
+    #     default_server.start()
+    # # 尝试连接到 Milvus 服务器
     try:
         connections.connect(alia='default', host='localhost', port=default_server.listen_port)
         print(f"成功连接到 Milvus 服务器，端口：{default_server.listen_port}")
     except Exception as e:
-        print(f"连接失败：{e}")
+        print(f"连接失败，再次尝试中：{e}")
+        default_server.start()
+        connections.connect(alia='default', host='localhost', port=default_server.listen_port)
+        print(f"成功连接到 Milvus 服务器，端口：{default_server.listen_port}")
 
 
 def is_connected():
