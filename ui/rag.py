@@ -1,15 +1,6 @@
 from ui.globals import *
 
 
-def embed_texts(texts: list[str]):
-    response = emb_client.embeddings.create(
-        model='embedding-v1',
-        input=texts
-    )
-    embeddings = [val.embedding for val in response.data]
-    return np.array(embeddings)
-
-
 def load_documents(file_names: list[str], file_paths: list[str]) -> list[Document]:
     """加载多个文档并返回合并后的Document列表"""
     all_docs = []
@@ -48,14 +39,6 @@ def hash_string(string):
 
 
 def connect_to_milvus():
-    # connections.disconnect(alias='default')
-    # try:
-    #     default_server.start()
-    # except Exception as e:
-    #     print(f"首次启动失败，尝试清理后重启: {e}")
-    #     default_server.cleanup()
-    #     default_server.start()
-    # # 尝试连接到 Milvus 服务器
     try:
         connections.connect(alia='default', host='localhost', port=default_server.listen_port)
         print(f"成功连接到 Milvus 服务器，端口：{default_server.listen_port}")
@@ -64,13 +47,6 @@ def connect_to_milvus():
         default_server.start()
         connections.connect(alia='default', host='localhost', port=default_server.listen_port)
         print(f"成功连接到 Milvus 服务器，端口：{default_server.listen_port}")
-
-
-def is_connected():
-    for x, _ in connections.list_connections():
-        if x == 'default':
-            return True
-    return False
 
 
 def create_file_clt():
@@ -109,7 +85,7 @@ def create_text_clt():
 
 
 def retrieval_texts(query, max_ret=5, n_probe=10):
-    query_embed = embed_texts(query)
+    query_embed = get_text_embeddings(query)
     search_params = {
         'metric_type': 'L2',
         'offset': 0,
@@ -146,7 +122,7 @@ def insert_text_clt(file_names: list[str], file_paths: list[str]):
     n = len(texts)
     for i in range(0, n, emb_size):
         j = i + emb_size
-        embeddings = embed_texts(texts[i:j])
+        embeddings = get_text_embeddings(texts[i:j])
         results = ses.text_clt.insert([ids[i:j], files[i:j], texts[i:j], embeddings])
         print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.text_clt.name}'")
     ses.text_clt.flush()
@@ -192,7 +168,7 @@ def update_text_clt(file_name: str, file_path: str):
     texts = [id2text[id] for id in add_ids]
     for i in range(0, n, emb_size):
         j = i + emb_size
-        embeddings = embed_texts(texts[i:j])
+        embeddings = get_text_embeddings(texts[i:j])
         results = ses.text_clt.insert([add_ids[i:j], files[i:j], texts[i:j], embeddings])
         print(f"成功插入 {results.insert_count} 条记录到集合 '{ses.text_clt.name}'")
     ses.text_clt.flush()

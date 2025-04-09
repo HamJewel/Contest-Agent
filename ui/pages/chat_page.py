@@ -1,6 +1,5 @@
 from ui.rag import *
 
-reasoning_content, answer_content = [], []
 if 'messages' not in ses:
     ses.messages = []
 if 'max_ret' not in ses:
@@ -8,6 +7,7 @@ if 'max_ret' not in ses:
 if 'n_probe' not in ses:
     ses.n_probe = 10
 llm = LLM_names[0]
+ses.reasoning_content, ses.answer_content = [], []
 
 
 def welcome():
@@ -64,27 +64,26 @@ def welcome():
 
 
 def reasoning_stream():
-    for chunk in response:
+    for chunk in ses.response:
         reasoning_chunk = chunk.choices[0].delta.reasoning_content
         answer_chunk = chunk.choices[0].delta.content
         if reasoning_chunk != '':
-            reasoning_content.append(reasoning_chunk)
+            ses.reasoning_content.append(reasoning_chunk)
             yield reasoning_chunk
         elif answer_chunk != '':
-            answer_content.append(answer_chunk)
+            ses.answer_content.append(answer_chunk)
+    ses.reasoning_content = ''.join(ses.reasoning_content)
 
 
 def write_reasoning():
-    global answer_content
     with st.status('推理过程', expanded=True):
         st.write_stream(reasoning_stream())
-    answer_content = ''.join(answer_content)
-    st.write(answer_content)
+    ses.answer_content = ''.join(ses.answer_content)
+    st.write(ses.answer_content)
 
 
 def write_answer():
-    global answer_content
-    answer_content = st.write_stream(response)
+    ses.answer_content = st.write_stream(ses.response)
 
 
 def write_messages():
@@ -130,20 +129,13 @@ if user_input:
                 st.caption(text)
     ses.messages.append({'role': 'user', 'content': user_input, 'information': ret_texts})
     user_content = get_user_content(ret_texts, user_input)
-    response = llm_client.chat.completions.create(
-        model=model,  # ModelScope Model-Id
-        messages=[
-            {'role': 'system', 'content': prompt},
-            {'role': 'user', 'content': user_content}
-        ],
-        stream=True,
-    )
+    ses.response = get_chat_completions(model, user_content)
     with st.chat_message('ai'):
         if reasoning:
             write_reasoning()
         else:
             write_answer()
-    next_msg = {'role': 'ai', 'content': answer_content}
+    next_msg = {'role': 'ai', 'content': ses.answer_content}
     if reasoning:
-        next_msg['reasoning_content'] = ''.join(reasoning_content)
+        next_msg['reasoning_content'] = ses.reasoning_content
     ses.messages.append(next_msg)

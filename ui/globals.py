@@ -60,3 +60,23 @@ def get_user_content(ret_texts: list[str], query):
     info = '\n'.join([text for text in ret_texts])
     user_content = f'<信息>\n{info}\n<问题>\n{query}'
     return user_content
+
+
+def get_text_embeddings(texts: list[str]):
+    response = emb_client.embeddings.create(
+        model='embedding-v1',
+        input=texts
+    )
+    embeddings = [val.embedding for val in response.data]
+    return np.array(embeddings)
+
+
+def get_chat_completions(model, user_content):
+    return llm_client.chat.completions.create(
+        model=model,  # ModelScope Model-Id
+        messages=[
+            {'role': 'system', 'content': prompt},
+            {'role': 'user', 'content': user_content}
+        ],
+        stream=True
+    )

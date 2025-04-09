@@ -91,23 +91,24 @@ def init():
             e1.empty()
             e2.empty()
             e1.info('连接数据库中...', icon='⏳')
-            connect_to_milvus()
-            e1.empty()
-            if not is_connected():
+            try:
+                connect_to_milvus()
+            except Exception as _:
+                e1.empty()
                 e1.error('连接失败', icon='❌')
                 return False
-            else:
-                ses.connected = True
-                e1.success('已连接数据库', icon='✅')
-                e2.info('获取数据中...', icon='⏳')
-                ses.file_clt = create_file_clt()
-                ses.text_clt = create_text_clt()
-                ses.file_clt.load()
-                ses.text_clt.load()
-                ses.file_data = get_file_data()
-                e2.empty()
-                e2.success('已获取数据', icon='✅')
-                return True
+            ses.connected = True
+            e1.empty()
+            e1.success('已连接数据库', icon='✅')
+            e2.info('获取数据中...', icon='⏳')
+            ses.file_clt = create_file_clt()
+            ses.text_clt = create_text_clt()
+            ses.file_clt.load()
+            ses.text_clt.load()
+            ses.file_data = get_file_data()
+            e2.empty()
+            e2.success('已获取数据', icon='✅')
+            return True
         return flag == 2
 
 
