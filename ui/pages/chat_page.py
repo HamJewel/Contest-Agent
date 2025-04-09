@@ -1,12 +1,5 @@
 from ui.rag import *
 
-if 'messages' not in ses:
-    ses.messages = []
-if 'max_ret' not in ses:
-    ses.max_ret = 5
-if 'n_probe' not in ses:
-    ses.n_probe = 10
-llm = LLM_names[0]
 ses.reasoning_content, ses.answer_content = [], []
 
 

@@ -23,11 +23,11 @@ def load_documents(file_names: list[str], file_paths: list[str]) -> list[Documen
     return all_docs
 
 
-def split_documents(docs: list[Document], chunk_size: int = 300, chunk_overlap: int = 50) -> list[Document]:
+def split_documents(docs: list[Document]) -> list[Document]:
     for doc in docs:
         doc.page_content = re.sub(r'\s', '', doc.page_content)  # 清除空白符
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len)
+        chunk_size=ses.chunk_size, chunk_overlap=ses.chunk_overlap, length_function=len)
     split_docs = splitter.split_documents(docs)
     return split_docs
 
@@ -54,8 +54,10 @@ def create_file_clt():
         return Collection('file_clt')
     file = FieldSchema(name='file', dtype=DataType.VARCHAR, max_length=256, is_primary=True, auto_id=False)
     date = FieldSchema(name='date', dtype=DataType.INT64)
+    chunk_size = FieldSchema(name='chunk_size', dtype=DataType.INT32)
+    chunk_overlap = FieldSchema(name='chunk_overlap', dtype=DataType.INT32)
     dummy = FieldSchema(name='dummy', dtype=DataType.FLOAT_VECTOR, dim=1)
-    schema = CollectionSchema(fields=[file, date, dummy], description="Files information (file, date)")
+    schema = CollectionSchema(fields=[file, date, chunk_size, chunk_overlap, dummy], description="Files information (file, date)")
     collection = Collection(name='file_clt', schema=schema)
     index_params = {
         'metric_type': 'L2',
@@ -107,6 +109,8 @@ def retrieval_texts(query, max_ret=5, n_probe=10):
 
 def insert_file_clt(file_names: list[str]):
     date = int(time())
+    chunk_size = ses.chunk_size
+    chunk_overlap = ses.chunk_overlap
     ses.file_clt.load()
     results = ses.file_clt.query(expr=f'date > 0', output_fields=['file'])
     pre_files = [res['file'] for res in results]
@@ -114,7 +118,7 @@ def insert_file_clt(file_names: list[str]):
     n = len(add_files)
     print(f'需要插入 {n} 条记录到集合 {ses.file_clt.name}')
     if n > 0:
-        results = ses.file_clt.insert([file_names, [date] * n, np.zeros((n, 1))])
+        results = ses.file_clt.insert([file_names, [date] * n, [chunk_size] * n, [chunk_overlap] * n, np.zeros((n, 1))])
         print(f'成功插入 {results.insert_count} 条记录到集合 {ses.file_clt.name}')
     ses.file_clt.flush()
 
@@ -150,11 +154,13 @@ def insert_collection(file_names, file_paths):
 
 def update_file_clt(file_names: list[str]):
     date = int(time())
+    chunk_size = ses.chunk_size
+    chunk_overlap = ses.chunk_overlap
     n = len(file_names)
     ses.file_clt.load()
     results = ses.file_clt.delete(expr=f'file in {file_names}')
     print(f'成功删除 {results.delete_count} 条记录从集合 {ses.file_clt.name}')
-    results = ses.file_clt.insert([file_names, [date] * n, np.zeros((n, 1))])
+    results = ses.file_clt.insert([file_names, [date] * n, [chunk_size] * n, [chunk_overlap] * n, np.zeros((n, 1))])
     print(f'成功插入 {results.insert_count} 条记录到集合 {ses.file_clt.name}')
     ses.file_clt.flush()
 

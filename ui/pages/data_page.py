@@ -1,8 +1,6 @@
 from ui.rag import *
 
-empty_file_data = pd.DataFrame(columns=['编号', '加载日期', '文件名称'])
-if 'connected' not in ses:
-    ses.connected = False
+empty_file_data = pd.DataFrame(columns=['编号', '加载日期', '文件名称', '文本块长度', '块重叠长度'])
 
 
 def welcome():
@@ -60,13 +58,13 @@ def welcome():
 
 def get_file_data():
     ses.file_clt.load()
-    results = ses.file_clt.query(expr='date > 0', output_fields=['date', 'file'])
+    results = ses.file_clt.query(expr='date > 0', output_fields=['date', 'file', 'chunk_size', 'chunk_overlap'])
     if len(results) == 0:
         return empty_file_data
     else:
         df = pd.DataFrame(results)
         df['date'] = df['date'].apply(lambda x: datetime.fromtimestamp(x, tz=zone).strftime("%Y-%m-%d %H:%M:%S"))
-        df.columns = ['加载日期', '文件名称']
+        df.columns = ['加载日期', '文件名称', '文本块长度', '块重叠长度']
         df.insert(0, '编号', range(1, len(df) + 1))
         return df
 
@@ -113,6 +111,9 @@ def init():
 if not init():
     welcome()
     st.stop()
+with st.sidebar:
+    st.number_input('文本块长度', min_value=10, key='chunk_size')
+    st.number_input('块重叠长度', min_value=0, key='chunk_overlap')
 col1, col2 = st.columns([2, 1])
 col1.write('**已加载文件**')
 data_holder = col1.empty()
