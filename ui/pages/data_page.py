@@ -62,7 +62,7 @@ def get_file_data():
     if len(results) == 0:
         return empty_file_data
     else:
-        df = pd.DataFrame(results)
+        df = pd.DataFrame(results, columns=['date', 'file', 'chunk_size', 'chunk_overlap'])
         df['date'] = df['date'].apply(lambda x: datetime.fromtimestamp(x, tz=zone).strftime("%Y-%m-%d %H:%M:%S"))
         df.columns = ['加载日期', '文件名称', '文本块长度', '块重叠长度']
         df.insert(0, '编号', range(1, len(df) + 1))
