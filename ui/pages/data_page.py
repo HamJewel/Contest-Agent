@@ -131,16 +131,16 @@ with st.sidebar:
 col1, col2 = st.columns([2, 1])
 col1.write('**已添加文件**')
 data_holder = col1.empty()
-if 'file_data' in ses:
-    data_holder.dataframe(ses.file_data, hide_index=True)
-else:
-    data_holder.dataframe(empty_file_data, hide_index=True)
+
+if 'file_data' not in ses:
+    ses.file_data = empty_file_data
+data_holder.dataframe(ses.file_data, hide_index=True)
 
 fu = col2.file_uploader('📤**上传文件**', ['pdf', 'txt', 'docx'], accept_multiple_files=True)
-load = col2.button('添加文件', type='primary', icon='🗃️', disabled=not fu, use_container_width=True)
 col3, col4 = col2.columns([1, 1])
-update = col3.button('更新文件', type='primary', icon='📝', disabled=not fu, use_container_width=True)
-delete = col4.button('删除文件', type='primary', icon='🗑️', disabled=not fu, use_container_width=True)
+insert = col3.button('添加文件', type='primary', icon='🗃️', disabled=not fu, use_container_width=True)
+update = col4.button('更新文件', type='primary', icon='📝', disabled=not fu, use_container_width=True)
+delete = col2.button('删除文件', type='primary', icon='🗑️', disabled=ses.file_data.empty, use_container_width=True)
 
 if clear:
     st.toast('**开始清空数据库**', icon='🚀')
@@ -149,7 +149,7 @@ if clear:
     data_holder.dataframe(ses.file_data, hide_index=True)
     st.toast('**数据库清空完成**', icon='🎉')
 
-if fu and (load or update):
+if fu and (insert or update):
     names, paths = [], []
     for file in fu:
         names.append(file.name)
@@ -158,7 +158,7 @@ if fu and (load or update):
             tmp_file.write(file.getvalue())
             paths.append(tmp_file.name)
     st.toast('**文件获取完成**', icon='📦')
-    if load:
+    if insert:
         st.toast('**开始添加文件**', icon='🚀')
         insert_collection(names, paths)
         ses.file_data = get_file_data()
