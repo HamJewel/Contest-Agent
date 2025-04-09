@@ -140,7 +140,7 @@ fu = col2.file_uploader('📤**上传文件**', ['pdf', 'txt', 'docx'], accept_m
 col3, col4 = col2.columns([1, 1])
 insert = col3.button('添加文件', type='primary', icon='🗃️', disabled=not fu, use_container_width=True)
 update = col4.button('更新文件', type='primary', icon='📝', disabled=not fu, use_container_width=True)
-delete = col2.button('删除文件', type='primary', icon='🗑️', disabled=ses.file_data.empty, use_container_width=True)
+delete = col2.button('删除文件', type='primary', icon='🗑️', use_container_width=True)
 
 if clear:
     st.toast('**开始清空数据库**', icon='🚀')
