@@ -115,18 +115,18 @@ if len(ses.messages) == 0:
         welcome()
 
 tips = '请输入你的问题' if ses.connected else '请先初始化数据库'
-user_input = st.chat_input(tips, disabled=not ses.connected, key='user_input')
+query = st.chat_input(tips, disabled=not ses.connected, key='query')
 
-if user_input:
+if query:
     welcome_holder.empty()
     with st.chat_message('user'):
-        st.write(user_input)
+        st.write(query)
         with st.status('检索信息', expanded=True):
-            ret_texts = retrieval_texts(user_input, max_ret, n_probe)
+            ret_texts = retrieval_texts(query, max_ret, n_probe)
             for text in ret_texts:
                 st.caption(text)
-    ses.messages.append({'role': 'user', 'content': user_input, 'information': ret_texts})
-    user_content = get_user_content(ret_texts, user_input)
+    ses.messages.append({'role': 'user', 'content': query, 'information': ret_texts})
+    user_content = get_user_content(ret_texts, query)
     ses.response = get_chat_completions(model, user_content)
     with st.chat_message('ai'):
         if reasoning:
