@@ -147,7 +147,7 @@ def insert_text_clt(file_names: list[str], file_paths: list[str]):
     ses.text_clt.flush()
 
 
-def insert_collection(file_names, file_paths):
+def insert_data(file_names: list[str], file_paths: list[str]):
     insert_file_clt(file_names)
     insert_text_clt(file_names, file_paths)
 
@@ -195,10 +195,31 @@ def update_text_clt(file_name: str, file_path: str):
     ses.text_clt.flush()
 
 
-def update_collection(file_names, file_paths):
+def update_data(file_names: list[str], file_paths: list[str]):
     update_file_clt(file_names)
     for name, path in zip(file_names, file_paths):
         update_text_clt(name, path)
+
+
+def delete_file_clt(file_names: list[str]):
+    ses.file_clt.load()
+    results = ses.file_clt.delete(expr=f'file in {file_names}')
+    print(f'成功删除 {results.delete_count} 条记录从集合 {ses.file_clt.name}')
+    ses.file_clt.flush()
+
+
+def delete_text_clt(file_names: list[str]):
+    ses.text_clt.load()
+    results = ses.text_clt.query(expr=f'file in {file_names}', output_fields=['id'])
+    ids = [res['id'] for res in results]
+    results = ses.text_clt.delete(expr=f'id in {ids}')
+    print(f'成功删除 {results.delete_count} 条记录从集合 {ses.text_clt.name}')
+    ses.text_clt.flush()
+
+
+def delete_data(file_names: list[str]):
+    delete_file_clt(file_names)
+    delete_text_clt(file_names)
 
 
 def clear_collection():

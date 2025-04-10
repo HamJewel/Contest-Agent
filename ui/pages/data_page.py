@@ -1,6 +1,6 @@
 from ui.rag import *
 
-empty_file_data = pd.DataFrame(columns=['编号', '添加日期', '文件名称', '文本块长度', '块重叠长度'])
+empty_table = pd.DataFrame(columns=['编号', '添加日期', '文件名称', '文本块长度', '块重叠长度'])
 
 
 def welcome():
@@ -56,17 +56,17 @@ def welcome():
     """, unsafe_allow_html=True)
 
 
-def get_file_data():
+def update_table():
     ses.file_clt.load()
     results = ses.file_clt.query(expr='date > 0', output_fields=['date', 'file', 'chunk_size', 'chunk_overlap'])
     if len(results) == 0:
-        return empty_file_data
+        ses.table = empty_table
     else:
         df = pd.DataFrame(results, columns=['date', 'file', 'chunk_size', 'chunk_overlap'])
         df['date'] = df['date'].apply(lambda x: datetime.fromtimestamp(x, tz=zone).strftime("%Y-%m-%d %H:%M:%S"))
         df.columns = ['添加日期', '文件名称', '文本块长度', '块重叠长度']
-        df.insert(0, '编号', range(1, len(df) + 1))
-        return df
+        df.insert(0, '编号', np.arange(1, len(df) + 1))
+        ses.table = df
 
 
 def init_state():
@@ -99,7 +99,7 @@ def init_state():
         e2.info('获取数据中...', icon='⏳')
         ses.file_clt = create_file_clt()
         ses.text_clt = create_text_clt()
-        ses.file_data = get_file_data()
+        update_table()
         e2.empty()
         e2.success('已获取数据', icon='✅')
         return True
@@ -132,22 +132,31 @@ col1, col2 = st.columns([2, 1])
 col1.write('**已添加文件**')
 data_holder = col1.empty()
 
-if 'file_data' not in ses:
-    ses.file_data = empty_file_data
-data_holder.dataframe(ses.file_data, hide_index=True)
+if 'table' not in ses:
+    ses.table = empty_table
+data_holder.dataframe(ses.table, hide_index=True)
 
 fu = col2.file_uploader('📤**上传文件**', ['pdf', 'txt', 'docx'], accept_multiple_files=True)
 col3, col4 = col2.columns([1, 1])
 insert = col3.button('添加文件', type='primary', icon='🗃️', disabled=not fu, use_container_width=True)
 update = col4.button('更新文件', type='primary', icon='📝', disabled=not fu, use_container_width=True)
-delete = col2.button('删除文件', type='primary', icon='🗑️', use_container_width=True)
+col2.divider()
+del_names = col2.multiselect('**选择要删除的文件**', ses.table['文件名称'], disabled=ses.table.empty)
+delete = col2.button('删除文件', type='primary', icon='🗑️', disabled=len(to_del) == 0, use_container_width=True)
 
 if clear:
     st.toast('**开始清空数据库**', icon='🚀')
     clear_collection()
-    ses.file_data = empty_file_data
-    data_holder.dataframe(ses.file_data, hide_index=True)
+    ses.table = empty_table
+    data_holder.dataframe(ses.table, hide_index=True)
     st.toast('**数据库清空完成**', icon='🎉')
+
+if delete:
+    st.toast('**开始删除文件**', icon='🚀')
+    delete_data(del_names)
+    update_table()
+    data_holder.dataframe(ses.table, hide_index=True)
+    st.toast('**文件删除完成**', icon='🎉')
 
 if fu and (insert or update):
     names, paths = [], []
@@ -160,13 +169,13 @@ if fu and (insert or update):
     st.toast('**文件获取完成**', icon='📦')
     if insert:
         st.toast('**开始添加文件**', icon='🚀')
-        insert_collection(names, paths)
-        ses.file_data = get_file_data()
-        data_holder.dataframe(ses.file_data, hide_index=True)
+        insert_data(names, paths)
+        update_table()
+        data_holder.dataframe(ses.table, hide_index=True)
         st.toast('**文件添加完成**', icon='🎉')
     if update:
         st.toast('**开始更新文件**', icon='🚀')
-        update_collection(names, paths)
-        ses.file_data = get_file_data()
-        data_holder.dataframe(ses.file_data, hide_index=True)
+        update_data(names, paths)
+        update_table()
+        data_holder.dataframe(ses.table, hide_index=True)
         st.toast('**文件更新完成**', icon='🎉')
