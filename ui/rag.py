@@ -73,7 +73,7 @@ def create_text_clt():
         return Collection('text_clt')
     id = FieldSchema(name='id', dtype=DataType.VARCHAR, max_length=128, is_primary=True, auto_id=False)
     file = FieldSchema(name='file', dtype=DataType.VARCHAR, max_length=256)
-    text = FieldSchema(name='text', dtype=DataType.VARCHAR, max_length=1024)
+    text = FieldSchema(name='text', dtype=DataType.VARCHAR, max_length=2048)
     embedding = FieldSchema(name='embedding', dtype=DataType.FLOAT_VECTOR, dim=384)
     schema = CollectionSchema(fields=[id, file, text, embedding], description="Text Embeddings (id, text, embedding)")
     collection = Collection(name='text_clt', schema=schema, shard_num=2)
