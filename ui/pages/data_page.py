@@ -125,7 +125,6 @@ if not init_state():
 status.update(expanded=False, state='complete')
 
 with st.sidebar:
-    clear = st.button('清空数据库', type='primary', icon='🧹', use_container_width=True)
     st.number_input('文本块长度', min_value=10, key='chunk_size')
     st.number_input('块重叠长度', min_value=0, key='chunk_overlap')
 col1, col2 = st.columns([2, 1])
@@ -143,6 +142,7 @@ update = col4.button('更新文件', type='primary', icon='📝', disabled=not f
 col2.divider()
 del_names = col2.multiselect('**选择要删除的文件**', ses.table['文件名称'], disabled=ses.table.empty)
 delete = col2.button('删除文件', type='primary', icon='🗑️', disabled=len(del_names) == 0, use_container_width=True)
+clear = col2.button('清空数据库', type='primary', icon='🧹', disabled=ses.table.empty, use_container_width=True)
 
 if clear:
     st.toast('**开始清空数据库**', icon='🚀')
