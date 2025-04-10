@@ -115,7 +115,7 @@ if len(ses.messages) == 0:
         welcome()
 
 tips = '请输入你的问题' if ses.connected else '请先初始化数据库'
-query = st.chat_input(tips, disabled=not ses.connected, key='query')
+query = st.chat_input(tips, disabled=not ses.connected)
 
 if query:
     welcome_holder.empty()
