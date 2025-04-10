@@ -57,6 +57,7 @@ def welcome():
 
 
 def update_table():
+    global data_holder
     ses.file_clt.load()
     results = ses.file_clt.query(expr='date > 0', output_fields=['date', 'file', 'chunk_size', 'chunk_overlap'])
     if len(results) == 0:
@@ -67,6 +68,7 @@ def update_table():
         df.columns = ['添加日期', '文件名称', '文本块长度', '块重叠长度']
         df.insert(0, '编号', np.arange(1, len(df) + 1))
         ses.table = df
+    data_holder.dataframe(ses.table, hide_index=True)
 
 
 def init_state():
@@ -129,9 +131,7 @@ with st.sidebar:
 col1, col2 = st.columns([2, 1])
 col1.write('**已添加文件**')
 data_holder = col1.empty()
-
 update_table()
-data_holder.dataframe(ses.table, hide_index=True)
 
 fu = col2.file_uploader('📤**上传文件**', ['pdf', 'txt', 'docx'], accept_multiple_files=True)
 col3, col4 = col2.columns([1, 1])
