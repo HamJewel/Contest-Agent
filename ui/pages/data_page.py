@@ -99,7 +99,6 @@ def init_state():
         e2.info('获取数据中...', icon='⏳')
         ses.file_clt = create_file_clt()
         ses.text_clt = create_text_clt()
-        update_table()
         e2.empty()
         e2.success('已获取数据', icon='✅')
         return True
@@ -131,8 +130,7 @@ col1, col2 = st.columns([2, 1])
 col1.write('**已添加文件**')
 data_holder = col1.empty()
 
-if 'table' not in ses:
-    ses.table = empty_table
+update_table()
 data_holder.dataframe(ses.table, hide_index=True)
 
 fu = col2.file_uploader('📤**上传文件**', ['pdf', 'txt', 'docx'], accept_multiple_files=True)
@@ -148,15 +146,12 @@ if clear:
     st.toast('**开始清空数据库**', icon='🚀')
     clear_collection()
     ses.table = empty_table
-    data_holder.dataframe(ses.table, hide_index=True)
     st.toast('**数据库清空完成**', icon='🎉')
     st.rerun()
 
 if delete:
     st.toast('**开始删除文件**', icon='🚀')
     delete_data(del_names)
-    update_table()
-    data_holder.dataframe(ses.table, hide_index=True)
     st.toast('**文件删除完成**', icon='🎉')
     st.rerun()
 
@@ -172,13 +167,9 @@ if fu and (insert or update):
     if insert:
         st.toast('**开始添加文件**', icon='🚀')
         insert_data(names, paths)
-        update_table()
-        data_holder.dataframe(ses.table, hide_index=True)
         st.toast('**文件添加完成**', icon='🎉')
     if update:
         st.toast('**开始更新文件**', icon='🚀')
         update_data(names, paths)
-        update_table()
-        data_holder.dataframe(ses.table, hide_index=True)
         st.toast('**文件更新完成**', icon='🎉')
     st.rerun()
