@@ -142,7 +142,7 @@ insert = col3.button('添加文件', type='primary', icon='🗃️', disabled=no
 update = col4.button('更新文件', type='primary', icon='📝', disabled=not fu, use_container_width=True)
 col2.divider()
 del_names = col2.multiselect('**选择要删除的文件**', ses.table['文件名称'], disabled=ses.table.empty)
-delete = col2.button('删除文件', type='primary', icon='🗑️', disabled=len(to_del) == 0, use_container_width=True)
+delete = col2.button('删除文件', type='primary', icon='🗑️', disabled=len(del_names) == 0, use_container_width=True)
 
 if clear:
     st.toast('**开始清空数据库**', icon='🚀')
