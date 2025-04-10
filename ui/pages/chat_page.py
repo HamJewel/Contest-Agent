@@ -114,7 +114,8 @@ if len(ses.messages) == 0:
     with welcome_holder:
         welcome()
 
-user_input = st.chat_input('请输入你的问题')
+user_input = st.chat_input('请输入你的问题' if ses.connected else '请先初始化数据库',
+                           disabled=not ses.connected, key='user_input')
 
 if user_input:
     welcome_holder.empty()
