@@ -150,6 +150,7 @@ if clear:
     ses.table = empty_table
     data_holder.dataframe(ses.table, hide_index=True)
     st.toast('**数据库清空完成**', icon='🎉')
+    st.rerun()
 
 if delete:
     st.toast('**开始删除文件**', icon='🚀')
@@ -157,6 +158,7 @@ if delete:
     update_table()
     data_holder.dataframe(ses.table, hide_index=True)
     st.toast('**文件删除完成**', icon='🎉')
+    st.rerun()
 
 if fu and (insert or update):
     names, paths = [], []
@@ -179,3 +181,4 @@ if fu and (insert or update):
         update_table()
         data_holder.dataframe(ses.table, hide_index=True)
         st.toast('**文件更新完成**', icon='🎉')
+    st.rerun()
