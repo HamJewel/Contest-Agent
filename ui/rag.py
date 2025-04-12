@@ -28,7 +28,7 @@ def split_documents(docs: list[Document]) -> list[Document]:
         doc.page_content = re.sub(r'\s', '', doc.page_content)  # 清除空白符
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=ses.chunk_size, chunk_overlap=ses.chunk_overlap,
-        seperators=['。', '！', '？', '；', ''], length_function=len)  # 长句保底机制''
+        separators=['。', '！', '？', '；', ''], length_function=len)  # 长句保底机制''
     split_docs = splitter.split_documents(docs)
     return split_docs
 
