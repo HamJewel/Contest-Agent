@@ -60,7 +60,7 @@ def create_file_clt():
     schema = CollectionSchema(fields=[file, date, chunk_size, chunk_overlap, dummy], description="Files information (file, date)")
     collection = Collection(name='file_clt', schema=schema)
     index_params = {
-        'metric_type': 'L2',
+        'metric_type': 'IP',
         'index_type': 'FLAT',
         'params': {}
     }
@@ -78,7 +78,7 @@ def create_text_clt():
     schema = CollectionSchema(fields=[id, file, text, embedding], description="Text Embeddings (id, text, embedding)")
     collection = Collection(name='text_clt', schema=schema, shard_num=2)
     index_params = {
-        'metric_type': 'L2',  # 在模长都为1的情况下，L2效果等同于COSINE,
+        'metric_type': 'IP',  # 内积,
         'index_type': 'IVF_FLAT',
         'params': {'nlist': 256}
     }
@@ -89,7 +89,7 @@ def create_text_clt():
 def retrieval_texts(query, max_ret=5, n_probe=10):
     query_embed = get_text_embeddings(query)
     search_params = {
-        'metric_type': 'L2',
+        'metric_type': 'IP',
         'offset': 0,
         'ignore_growing': False,
         'params': {'nprobe': n_probe}  # 增加 nprobe 值以提高检索范围
