@@ -158,10 +158,8 @@ def update_file_clt(file_names: list[str]):
     chunk_overlap = ses.chunk_overlap
     n = len(file_names)
     ses.file_clt.load()
-    results = ses.file_clt.delete(expr=f'file in {file_names}')
-    print(f'成功删除 {results.delete_count} 条记录从集合 {ses.file_clt.name}')
     results = ses.file_clt.insert([file_names, [date] * n, [chunk_size] * n, [chunk_overlap] * n, np.zeros((n, 1))])
-    print(f'成功插入 {results.insert_count} 条记录到集合 {ses.file_clt.name}')
+    print(f'成功更新 {results.insert_count} 条记录到集合 {ses.file_clt.name}')
     ses.file_clt.flush()
 
 
