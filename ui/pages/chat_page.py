@@ -99,7 +99,7 @@ def write_messages():
 
 
 with st.sidebar:
-    if st.button('清空聊天记录', type='primary', icon='🗑️', use_container_width=True):
+    if st.button('清空对话记录', type='primary', icon='🗑️', use_container_width=True):
         ses.messages.clear()
         ses.dialogs = [sys_msg]
     dialog = st.checkbox('启用多轮对话', key='dialog')
