@@ -11,7 +11,7 @@ if 'chunk_overlap' not in ses:
 if 'messages' not in ses:
     ses.messages = []
 if 'dialogs' not in ses:
-    ses.dialogs = sys_msg
+    ses.dialogs = [sys_msg]
 if 'llm' not in ses:
     ses.llm = LLM_names[0]
 if 'max_ret' not in ses:

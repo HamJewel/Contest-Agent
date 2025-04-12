@@ -101,7 +101,7 @@ def write_messages():
 with st.sidebar:
     if st.button('清空聊天记录', type='primary', icon='🗑️', use_container_width=True):
         ses.messages.clear()
-        ses.dialogs = sys_msg
+        ses.dialogs = [sys_msg]
     dialog = st.checkbox('启用上下文', key='dialog')
     llm = st.selectbox('大模型列表', LLM_names, key='llm')
     model = LLMs[llm]['model']
@@ -132,7 +132,7 @@ if query:
     msg['information'] = ret_texts
     ses.messages.append(msg)
     user_content = get_user_content(ret_texts, query)
-    request = (ses.dialogs if dialog else sys_msg) + [{'role': 'user', 'content': user_content}]
+    request = (ses.dialogs if dialog else [sys_msg]) + [{'role': 'user', 'content': user_content}]
     ses.response = get_chat_completions(model, request)
     with st.chat_message('assistant'):
         if reasoning:
