@@ -20,8 +20,8 @@ import re
 temp_path = 'temp'
 os.makedirs(temp_path, exist_ok=True)
 zone = ZoneInfo('Asia/Shanghai')
-Cache_keys = ['messages', 'connected', 'file_clt', 'text_clt', 'table',
-              'chunk_size', 'chunk_overlap', 'llm', 'max_ret', 'n_probe']
+cache_keys = ['messages', 'dialog', 'dialogs', 'connected', 'file_clt', 'text_clt',
+              'table', 'chunk_size', 'chunk_overlap', 'llm', 'max_ret', 'n_probe']
 LLM_names = ['DeepSeek-V3', 'DeepSeek-R1(支持推理)', 'QwQ-32B(支持推理)', 'Qwen2.5-72B', 'Llama3.3-70B', 'Llama3.1-8B']
 LLMs = {
     'DeepSeek-V3': {'model': 'deepseek-ai/DeepSeek-V3-0324', 'reasoning': False},
@@ -46,7 +46,7 @@ prompt = r"""你是一个竞赛智能客服，需要结合用户给出的竞赛�
 你：
 第X届XX竞赛的举办时间是2025年X月X日到X月X日。
 【注：如果是带有互动性质的问题(需要你自己去判断)，请忽略信息材料，直接与用户进行聊天互动，不要回答“缺乏相关信息，无法回答”。】"""
-
+sys_msg = [{'role': 'system', 'content': prompt}]
 emb_size = 16  # 最大的嵌入批量数
 emb_client = OpenAI(
     api_key='310fb7e2423d29764988b18edb7896f786e6441b',
@@ -74,12 +74,9 @@ def get_text_embeddings(texts: list[str]):
     return np.array(embeddings)
 
 
-def get_chat_completions(model, user_content):
+def get_chat_completions(model, request):
     return llm_client.chat.completions.create(
         model=model,  # ModelScope Model-Id
-        messages=[
-            {'role': 'system', 'content': prompt},
-            {'role': 'user', 'content': user_content}
-        ],
+        messages=request,
         stream=True
     )

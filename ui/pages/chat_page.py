@@ -86,7 +86,7 @@ def write_answer():
 def write_messages():
     for msg in ses.messages:  # 加载缓存
         with st.chat_message(msg['role']):
-            if msg['role'] == 'ai':
+            if msg['role'] == 'assistant':
                 if 'reasoning_content' in msg:
                     with st.status('推理过程'):
                         st.caption(msg['reasoning_content'])
@@ -101,6 +101,8 @@ def write_messages():
 with st.sidebar:
     if st.button('清空聊天记录', type='primary', icon='🗑️', use_container_width=True):
         ses.messages.clear()
+        ses.dialogs = sys_msg
+    dialog = st.checkbox('启用上下文', key='dialog')
     llm = st.selectbox('大模型列表', LLM_names, key='llm')
     model = LLMs[llm]['model']
     reasoning = LLMs[llm]['reasoning']
@@ -125,15 +127,20 @@ if query:
             ret_texts = retrieval_texts(query, max_ret, n_probe)
             for text in ret_texts:
                 st.caption(text)
-    ses.messages.append({'role': 'user', 'content': query, 'information': ret_texts})
+    msg = {'role': 'user', 'content': query}
+    ses.dialogs.append(msg)
+    msg['information'] = ret_texts
+    ses.messages.append(msg)
     user_content = get_user_content(ret_texts, query)
-    ses.response = get_chat_completions(model, user_content)
-    with st.chat_message('ai'):
+    request = (ses.dialogs if dialog else sys_msg) + [{'role': 'user', 'content': user_content}]
+    ses.response = get_chat_completions(model, request)
+    with st.chat_message('assistant'):
         if reasoning:
             write_reasoning()
         else:
             write_answer()
-    next_msg = {'role': 'ai', 'content': ses.answer_content}
+    msg = {'role': 'assistant', 'content': ses.answer_content}
+    ses.dialogs.append(msg)
     if reasoning:
-        next_msg['reasoning_content'] = ses.reasoning_content
-    ses.messages.append(next_msg)
+        msg['reasoning_content'] = ses.reasoning_content
+    ses.messages.append(msg)
