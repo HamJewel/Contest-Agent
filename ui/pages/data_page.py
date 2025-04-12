@@ -1,6 +1,6 @@
 from ui.rag import *
 
-empty_table = pd.DataFrame(columns=['编号', '添加日期', '文件名称', '文本块长度', '块重叠长度'])
+empty_table = pd.DataFrame(columns=['编号', '添加日期', '文件名称', '文本段长度', '段重叠长度'])
 
 
 def welcome():
@@ -65,7 +65,7 @@ def update_table():
     else:
         df = pd.DataFrame(results, columns=['date', 'file', 'chunk_size', 'chunk_overlap'])
         df['date'] = df['date'].apply(lambda x: datetime.fromtimestamp(x, tz=zone).strftime("%Y-%m-%d %H:%M:%S"))
-        df.columns = ['添加日期', '文件名称', '文本块长度', '块重叠长度']
+        df.columns = ['添加日期', '文件名称', '文本段长度', '段重叠长度']
         df.insert(0, '编号', np.arange(1, len(df) + 1))
         ses.table = df
     data_holder.dataframe(ses.table, hide_index=True)
@@ -126,8 +126,8 @@ if not init_state():
 status.update(expanded=False, state='complete')
 
 with st.sidebar:
-    st.number_input('文本块长度', min_value=10, key='chunk_size')
-    st.number_input('块重叠长度', min_value=0, key='chunk_overlap')
+    st.number_input('文本段长度', min_value=10, key='chunk_size')
+    st.number_input('段重叠长度', min_value=0, key='chunk_overlap')
 col1, col2 = st.columns([2, 1])
 col1.write('**已添加文件**')
 data_holder = col1.empty()
