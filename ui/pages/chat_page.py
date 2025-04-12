@@ -102,7 +102,7 @@ with st.sidebar:
     if st.button('清空聊天记录', type='primary', icon='🗑️', use_container_width=True):
         ses.messages.clear()
         ses.dialogs = [sys_msg]
-    dialog = st.checkbox('启用上下文', key='dialog')
+    dialog = st.checkbox('启用多轮对话', key='dialog')
     llm = st.selectbox('大模型列表', LLM_names, key='llm')
     model = LLMs[llm]['model']
     reasoning = LLMs[llm]['reasoning']
