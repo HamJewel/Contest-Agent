@@ -18,9 +18,7 @@ import shutil
 import os
 import re
 temp_path = 'temp'
-if os.path.exists(temp_path):
-    shutil.rmtree(temp_path)
-os.makedirs(temp_path)
+os.makedirs(temp_path, exist_ok=True)
 zone = ZoneInfo('Asia/Shanghai')
 cache_keys = ['messages', 'dialog', 'knowledge', 'dialogs', 'connected', 'contest_clt',
               'text_clt', 'table', 'chunk_size', 'chunk_overlap', 'llm', 'max_ret', 'n_probe']
@@ -63,6 +61,12 @@ llm_client = OpenAI(
     api_key='c57442f8-5cae-46d1-b264-0e8091236dfa',  # ModelScope Token
     base_url='https://api-inference.modelscope.cn/v1/',
 )
+
+
+def clear_temp_files():
+    if os.path.exists(temp_path):
+        shutil.rmtree(temp_path)
+        os.makedirs(temp_path)
 
 
 def get_user_content(ret_texts: list[str], query):

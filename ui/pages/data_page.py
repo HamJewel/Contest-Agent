@@ -118,4 +118,5 @@ if fu and (insert or update):
         st.toast('**开始更新文件**', icon='🚀')
         update_data(names, paths)
         st.toast('**文件更新完成**', icon='🎉')
+    clear_temp_files()
     st.rerun()

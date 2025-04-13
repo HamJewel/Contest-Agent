@@ -75,6 +75,7 @@ def query_from_input():
             with NamedTemporaryFile(suffix=ext, dir=temp_path, delete=False) as tmp_file:
                 tmp_file.write(file.getvalue())
                 doc_content = PyPDFLoader(tmp_file.name, mode='single').load()[0].page_content
+            clear_temp_files()
             with st.status('文件信息', expanded=True):
                 st.caption(file_info)
     msg = {'role': 'user', 'content': ses.query.text}
