@@ -117,10 +117,11 @@ def insert_contest_clt(file_names: list[str]):
     for x in file_names:
         x = x.split('_')
         id2contest[int(x[0])] = x[1][:-4]
+    new_ids = list(id2contest)
     ses.contest_clt.load()
-    results = ses.contest_clt.query(expr=f'id in {id2contest.keys()}', output_fields=['id'])
+    results = ses.contest_clt.query(expr=f'id in {new_ids}', output_fields=['id'])
     pre_ids = [res['id'] for res in results]
-    add_ids = list(set(id2contest.keys()) - set(pre_ids))
+    add_ids = list(set(new_ids) - set(pre_ids))
     n = len(add_ids)
     print(f'需要插入 {n} 条记录到集合 {ses.contest_clt.name}')
     if n > 0:
