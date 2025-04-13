@@ -99,7 +99,7 @@ def init_state():
         e1.empty()
         e1.success('已连接数据库', icon='✅')
         e2.info('获取数据中...', icon='⏳')
-        ses.contest_clt = create_file_clt()
+        ses.contest_clt = create_contest_clt()
         ses.text_clt = create_text_clt()
         e2.empty()
         e2.success('已获取数据', icon='✅')
