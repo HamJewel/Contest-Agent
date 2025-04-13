@@ -58,8 +58,6 @@ def init_state():
 
 
 with st.sidebar:
-    if st.button('Test', type='primary', use_container_width=True):
-        st.toast(f'{len(os.listdir(temp_path))}')
     init = st.button('初始化数据库', type='primary', icon='🔗', use_container_width=True)
     status = st.status('初始化状态', expanded=True, state='running')
     e1 = status.empty()
