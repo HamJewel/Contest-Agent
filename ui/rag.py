@@ -26,9 +26,8 @@ def load_documents(file_names: list[str], file_paths: list[str]) -> list[Documen
 def split_documents(docs: list[Document]) -> list[Document]:
     for doc in docs:
         doc.page_content = re.sub(r'\s', '', doc.page_content)  # 清除空白符
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=ses.chunk_size, chunk_overlap=ses.chunk_overlap,
-        separators=['。', '！', '？', '；', ''], length_function=len)  # 长句保底机制''
+    splitter = RecursiveCharacterTextSplitter(chunk_size=ses.chunk_size, chunk_overlap=ses.chunk_overlap,
+                                              separators=separators, length_function=len)
     split_docs = splitter.split_documents(docs)
     return split_docs
 
@@ -105,7 +104,7 @@ def retrieval_texts(query, max_ret=5, n_probe=10):
         output_fields=['text'],
         consistency_level='Strong'
     )
-    ret_texts = [res.entity.get('text') for res in results[0]]
+    ret_texts = [res.entity.get('text').strip(separators) for res in results[0]]
     return ret_texts
 
 
