@@ -232,8 +232,7 @@ def delete_text_clt(contests: list[str]):
     ses.text_clt.flush()
 
 
-def delete_data(file_names: list[str]):
-    contests = [x.split('_')[1][:-4] for x in file_names]
+def delete_data(contests: list[str]):
     delete_contest_clt(contests)
     delete_text_clt(contests)
 
