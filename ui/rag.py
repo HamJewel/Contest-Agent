@@ -53,7 +53,7 @@ def connect_to_milvus():
 def create_contest_clt():
     if 'contest_clt' in utility.list_collections():
         return Collection('contest_clt')
-    id = FieldSchema(name='id', dtype=DataType.INT32, is_primary=True, auto_id=False)
+    id = FieldSchema(name='id', dtype=DataType.INT64, is_primary=True, auto_id=False)
     contest = FieldSchema(name='contest', dtype=DataType.VARCHAR, max_length=256)
     date = FieldSchema(name='date', dtype=DataType.INT64)
     chunk_size = FieldSchema(name='chunk_size', dtype=DataType.INT32)
