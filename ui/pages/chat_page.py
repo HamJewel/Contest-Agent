@@ -144,8 +144,8 @@ with st.sidebar:
     if st.button('清空对话记录', type='primary', icon='🗑️', use_container_width=True):
         ses.messages.clear()
         ses.dialogs = []
-    dialog = st.checkbox('启用多轮对话', key='dialog')
     knowledge = st.checkbox('启用知识库', key='knowledge')
+    dialog = st.checkbox('启用多轮对话', key='dialog')
     llm = st.selectbox('大模型列表', LLM_names, key='llm')
     model = LLMs[llm]['model']
     reasoning = LLMs[llm]['reasoning']

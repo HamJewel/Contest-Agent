@@ -18,6 +18,8 @@ if 'max_ret' not in ses:
     ses.max_ret = 5
 if 'n_probe' not in ses:
     ses.n_probe = 10
+if 'knowledge' not in ses:
+    ses.knowledge = True
 st.set_page_config(f'竞赛智能客服机器人', page_icon='assets/robot.png', layout='wide')
 st.logo('assets/tipdm.png', size='large')
 pages = [
