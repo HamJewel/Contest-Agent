@@ -27,7 +27,7 @@ def split_documents(docs: list[Document]) -> list[Document]:
     for doc in docs:
         doc.page_content = re.sub(r'\s', '', doc.page_content)  # 清除空白符
     splitter = RecursiveCharacterTextSplitter(chunk_size=ses.chunk_size, chunk_overlap=ses.chunk_overlap,
-                                              separators=separators, length_function=len)
+                                              separators=sep_list, length_function=len)
     split_docs = splitter.split_documents(docs)
     return split_docs
 
@@ -104,7 +104,7 @@ def retrieval_texts(query, max_ret=5, n_probe=10):
         output_fields=['text'],
         consistency_level='Strong'
     )
-    ret_texts = [res.entity.get('text').strip(''.join(separators)) for res in results[0]]
+    ret_texts = [res.entity.get('text') for res in results[0]]
     return ret_texts
 
 
@@ -134,7 +134,7 @@ def insert_text_clt(file_names: list[str], file_paths: list[str]):
     all_docs = load_documents(file_names, file_paths)
     split_docs = split_documents(all_docs)
     contests = [doc.metadata['file_name'].split('_')[1][:-4] for doc in split_docs]
-    texts = [f"《{contest}》：{doc.page_content}" for contest, doc in zip(contests, split_docs)]
+    texts = [f"《{contest}》：{doc.page_content.strip(sep_str)}" for contest, doc in zip(contests, split_docs)]
     new_ids = [hash_string(text) for text in texts]
     id2info = {new_ids[i]: [contests[i], texts[i]] for i in range(len(new_ids))}
     ses.text_clt.load()
@@ -180,7 +180,7 @@ def update_text_clt(file_name: str, file_path: str):
     all_docs = load_documents([file_name], [file_path])
     split_docs = split_documents(all_docs)
     contest = file_name.split('_')[1][:-4]
-    texts = [f"《{contest}》：{doc.page_content}" for doc in split_docs]
+    texts = [f"《{contest}》：{doc.page_content.strip(sep_str)}" for doc in split_docs]
     new_ids = [hash_string(text) for text in texts]
     id2text = {id: text for id, text in zip(new_ids, texts)}
     new_ids = set(new_ids)
