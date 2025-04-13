@@ -3,59 +3,6 @@ from ui.rag import *
 empty_table = pd.DataFrame(columns=['编号', '添加日期', '竞赛名称', '文本段长度', '段重叠长度'])
 
 
-def welcome():
-    st.markdown("""
-    <style>
-        @keyframes floatIn {
-            0% {
-                transform: translateY(-100px);
-                opacity: 0;
-            }
-            80% {
-                transform: translateY(10px);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(0);
-            }
-        }
-
-        .welcome-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            margin: 150px 0 20px 0;
-            animation: floatIn 1s ease-out forwards;
-        }
-        .big-emoji {
-            font-size: 100px;
-            margin-bottom: 5px;
-            animation: bounce 2s infinite;
-        }
-        .welcome-text {
-            font-size: 25px;
-            font-weight: bold;
-        }
-
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-    </style>
-
-    <div class="welcome-container">
-        <div class="big-emoji">🔗</div>
-        <div class="welcome-text">请先初始化数据库🗃️</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
 def update_table():
     global data_holder
     ses.contest_clt.load()
@@ -120,7 +67,7 @@ with st.sidebar:
     e2 = status.empty()
 
 if not init_state():
-    welcome()
+    welcome('🔗', '请先初始化数据库🗃️')
     status.update(expanded=True, state='error')
     st.stop()
 status.update(expanded=False, state='complete')

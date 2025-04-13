@@ -32,7 +32,7 @@ LLMs = {
     'Llama3.1-8B': {'model': 'LLM-Research/Meta-Llama-3.1-8B-Instruct', 'reasoning': False}
 }
 # 请分别给出“未来校园”智能应用专项赛的赛项名称、赛道、发布时间、报名时间、组织单位、官网。
-prompt = r"""你是一个竞赛智能客服，需要结合用户给出的竞赛相关信息和问题，给出简洁且精确的回答。
+prompt = r"""你是一个竞赛智能客服，需要结合用户给出的竞赛相关信息和问题，给出简要且准确的回答。
 注意：回答时不需要解释思考过程，直接输出回答即可，同时要求回答排版正确美观。
 如果文本中没有相关信息，就直接告知“缺乏相关信息，无法回答。”，不能胡编乱造！
 首先用户会提出一个问题，你需要结合接下来的背景信息进行回答。
@@ -85,3 +85,56 @@ def get_chat_completions(model, request):
         messages=request,
         stream=True
     )
+
+
+def welcome(emoji, text):
+    st.markdown(f"""
+    <style>
+        @keyframes floatIn {{
+            0% {{
+                transform: translateY(-100px);
+                opacity: 0;
+            }}
+            80% {{
+                transform: translateY(10px);
+                opacity: 1;
+            }}
+            100% {{
+                transform: translateY(0);
+            }}
+        }}
+
+        .welcome-container {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin: 150px 0 20px 0;
+            animation: floatIn 1s ease-out forwards;
+        }}
+        .big-emoji {{
+            font-size: 100px;
+            margin-bottom: 5px;
+            animation: bounce 2s infinite;
+        }}
+        .welcome-text {{
+            font-size: 25px;
+            font-weight: bold;
+        }}
+
+        @keyframes bounce {{
+            0%, 100% {{
+                transform: translateY(0);
+            }}
+            50% {{
+                transform: translateY(-10px);
+            }}
+        }}
+    </style>
+
+    <div class="welcome-container">
+        <div class="big-emoji">{emoji}</div>
+        <div class="welcome-text">{text}</div>
+    </div>
+    """, unsafe_allow_html=True)

@@ -3,59 +3,6 @@ from ui.rag import *
 ses.reasoning_content, ses.answer_content = [], []
 
 
-def welcome():
-    st.markdown("""
-    <style>
-        @keyframes floatIn {
-            0% {
-                transform: translateY(-100px);
-                opacity: 0;
-            }
-            80% {
-                transform: translateY(10px);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(0);
-            }
-        }
-
-        .welcome-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            margin: 150px 0 20px 0;
-            animation: floatIn 1s ease-out forwards;
-        }
-        .big-emoji {
-            font-size: 100px;
-            margin-bottom: 5px;
-            animation: bounce 2s infinite;
-        }
-        .welcome-text {
-            font-size: 25px;
-            font-weight: bold;
-        }
-
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-    </style>
-
-    <div class="welcome-container">
-        <div class="big-emoji">🤖</div>
-        <div class="welcome-text">我是您的智能客服，任何问题都可以咨询我✨</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
 def reasoning_stream():
     for chunk in ses.response:
         reasoning_chunk = chunk.choices[0].delta.reasoning_content
@@ -157,7 +104,7 @@ write_messages()
 welcome_holder = st.empty()
 if len(ses.messages) == 0:
     with welcome_holder:
-        welcome()
+        welcome('🤖', '我是您的智能客服，任何问题都可以咨询我✨')
 
 tips = '请输入你的问题' if ses.connected else '请先初始化数据库'
 ses.query = st.chat_input(tips, accept_file=True, file_type=file_type, disabled=not ses.connected)
