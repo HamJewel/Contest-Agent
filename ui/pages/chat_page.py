@@ -95,7 +95,7 @@ with st.sidebar:
     knowledge = st.checkbox('启用知识库', key='knowledge')
     dialog = st.checkbox('启用多轮对话', key='dialog')
     llm = st.selectbox('大模型列表', LLM_names, key='llm',
-                       help='1、支持推理的模型能输出详细的推理过程\n2、若回答超时，请更换其他模型(免费API稳定性较差)')
+                       help='1.支持推理的模型能输出详细的推理过程   2.若回答超时，请更换其他模型(免费API稳定性较差)')
     model = LLMs[llm]['model']
     reasoning = LLMs[llm]['reasoning']
     max_ret = st.number_input('最大检索信息数', min_value=1, key='max_ret')
