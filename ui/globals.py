@@ -20,7 +20,7 @@ import re
 temp_path = 'temp'
 os.makedirs(temp_path, exist_ok=True)
 zone = ZoneInfo('Asia/Shanghai')
-cache_keys = ['messages', 'dialog', 'dialogs', 'connected', 'file_clt', 'text_clt',
+cache_keys = ['messages', 'dialog', 'dialogs', 'connected', 'contest_clt', 'text_clt',
               'table', 'chunk_size', 'chunk_overlap', 'llm', 'max_ret', 'n_probe']
 LLM_names = ['DeepSeek-V3', 'DeepSeek-R1(支持推理)', 'QwQ-32B(支持推理)', 'Qwen2.5-72B', 'Llama3.3-70B', 'Llama3.1-8B']
 LLMs = {
@@ -31,9 +31,10 @@ LLMs = {
     'Llama3.3-70B': {'model': 'LLM-Research/Llama-3.3-70B-Instruct', 'reasoning': False},
     'Llama3.1-8B': {'model': 'LLM-Research/Meta-Llama-3.1-8B-Instruct', 'reasoning': False}
 }
+# 请分别给出“未来校园”智能应用专项赛的赛项名称、赛道、发布时间、报名时间、组织单位、官网。
 prompt = r"""你是一个竞赛智能客服，需要结合用户给出的竞赛相关信息和问题，给出简洁且精确的回答。
 首先这些文本里包含了若干段RAG技术筛选后的背景信息，并且位置越靠前的相关度越高，不同段用换行符\n间隔。
-每段信息的结构为“《编号_竞赛名称》：竞赛相关信息”，注意：不同竞赛的信息相互独立，不能混淆利用
+每段信息的结构为“《竞赛名称》：竞赛相关信息”，注意：不同竞赛的信息相互独立，不能混淆利用
 接下来用户会提出一个问题，你需要结合这些背景信息给出回答。
 注意：回答时不需要解释思考过程，直接输出回答即可，同时要求回答排版正确美观。
 如果文本中没有相关信息，就直接告知“缺乏相关信息，无法回答。”，不能胡编乱造！

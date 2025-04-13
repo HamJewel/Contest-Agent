@@ -50,16 +50,17 @@ def connect_to_milvus():
         print(f'成功连接到 Milvus 服务器，端口：{default_server.listen_port}')
 
 
-def create_file_clt():
-    if 'file_clt' in utility.list_collections():
-        return Collection('file_clt')
-    file = FieldSchema(name='file', dtype=DataType.VARCHAR, max_length=256, is_primary=True, auto_id=False)
+def create_contest_clt():
+    if 'contest_clt' in utility.list_collections():
+        return Collection('contest_clt')
+    id = FieldSchema(name='id', dtype=DataType.INT32, is_primary=True, auto_id=False)
+    contest = FieldSchema(name='contest', dtype=DataType.VARCHAR, max_length=256)
     date = FieldSchema(name='date', dtype=DataType.INT64)
     chunk_size = FieldSchema(name='chunk_size', dtype=DataType.INT32)
     chunk_overlap = FieldSchema(name='chunk_overlap', dtype=DataType.INT32)
     dummy = FieldSchema(name='dummy', dtype=DataType.FLOAT_VECTOR, dim=1)
-    schema = CollectionSchema(fields=[file, date, chunk_size, chunk_overlap, dummy], description="Files information (file, date)")
-    collection = Collection(name='file_clt', schema=schema)
+    schema = CollectionSchema(fields=[id, contest, date, chunk_size, chunk_overlap, dummy])
+    collection = Collection(name='contest_clt', schema=schema)
     index_params = {
         'metric_type': 'IP',
         'index_type': 'FLAT',
@@ -73,10 +74,10 @@ def create_text_clt():
     if 'text_clt' in utility.list_collections():
         return Collection('text_clt')
     id = FieldSchema(name='id', dtype=DataType.VARCHAR, max_length=128, is_primary=True, auto_id=False)
-    file = FieldSchema(name='file', dtype=DataType.VARCHAR, max_length=256)
+    contest = FieldSchema(name='contest', dtype=DataType.VARCHAR, max_length=256)
     text = FieldSchema(name='text', dtype=DataType.VARCHAR, max_length=2048)
     embedding = FieldSchema(name='embedding', dtype=DataType.FLOAT_VECTOR, dim=384)
-    schema = CollectionSchema(fields=[id, file, text, embedding], description="Text Embeddings (id, text, embedding)")
+    schema = CollectionSchema(fields=[id, contest, text, embedding])
     collection = Collection(name='text_clt', schema=schema, shard_num=2)
     index_params = {
         'metric_type': 'IP',  # 内积,
@@ -101,38 +102,43 @@ def retrieval_texts(query, max_ret=5, n_probe=10):
         anns_field='embedding',
         param=search_params,
         limit=max_ret,
-        output_fields=['file', 'text'],
+        output_fields=['text'],
         consistency_level='Strong'
     )
     ret_texts = [res.entity.get('text') for res in results[0]]
     return ret_texts
 
 
-def insert_file_clt(file_names: list[str]):
+def insert_contest_clt(file_names: list[str]):
     date = int(time())
     chunk_size = ses.chunk_size
     chunk_overlap = ses.chunk_overlap
-    ses.file_clt.load()
-    results = ses.file_clt.query(expr=f'date > 0', output_fields=['file'])
-    pre_files = [res['file'] for res in results]
-    add_files = list(set(file_names) - set(pre_files))
-    n = len(add_files)
-    print(f'需要插入 {n} 条记录到集合 {ses.file_clt.name}')
+    id2contest = {}
+    for x in file_names:
+        x = x.split('_')
+        id2contest[int(x[0])] = x[1][:-4]
+    ses.contest_clt.load()
+    results = ses.contest_clt.query(expr=f'id in {id2contest.keys()}', output_fields=['id'])
+    pre_ids = [res['id'] for res in results]
+    add_ids = list(set(id2contest.keys()) - set(pre_ids))
+    n = len(add_ids)
+    print(f'需要插入 {n} 条记录到集合 {ses.contest_clt.name}')
     if n > 0:
-        results = ses.file_clt.insert([file_names, [date] * n, [chunk_size] * n, [chunk_overlap] * n, np.zeros((n, 1))])
-        print(f'成功插入 {results.insert_count} 条记录到集合 {ses.file_clt.name}')
-    ses.file_clt.flush()
+        results = ses.contest_clt.insert([add_ids, [id2contest[id] for id in add_ids], [date] * n,
+                                         [chunk_size] * n, [chunk_overlap] * n, np.zeros((n, 1))])
+        print(f'成功插入 {results.insert_count} 条记录到集合 {ses.contest_clt.name}')
+    ses.contest_clt.flush()
 
 
 def insert_text_clt(file_names: list[str], file_paths: list[str]):
     all_docs = load_documents(file_names, file_paths)
     split_docs = split_documents(all_docs)
-    files = [doc.metadata['file_name'] for doc in split_docs]
-    texts = [f"《{file.split('.')[0]}》：{doc.page_content}" for file, doc in zip(files, split_docs)]
+    contests = [doc.metadata['file_name'].split('_')[1][:-4] for doc in split_docs]
+    texts = [f"《{contest}》：{doc.page_content}" for contest, doc in zip(contests, split_docs)]
     new_ids = [hash_string(text) for text in texts]
-    id2info = {new_ids[i]: [files[i], texts[i]] for i in range(len(new_ids))}
+    id2info = {new_ids[i]: [contests[i], texts[i]] for i in range(len(new_ids))}
     ses.text_clt.load()
-    results = ses.text_clt.query(expr=f'id != "0"', output_fields=['id'])
+    results = ses.text_clt.query(expr=f'contest in {contests}', output_fields=['id'])
     pre_ids = [res['id'] for res in results]
     add_ids = list(set(new_ids) - set(pre_ids))  # 添加更新后新增的记录
     n = len(add_ids)
@@ -140,39 +146,46 @@ def insert_text_clt(file_names: list[str], file_paths: list[str]):
     for i in range(0, n, emb_size):
         j = i + emb_size
         ids = add_ids[i:j]
-        files = [id2info[i][0] for i in ids]
+        contests = [id2info[i][0] for i in ids]
         texts = [id2info[i][1] for i in ids]
         embeddings = get_text_embeddings(texts)
-        results = ses.text_clt.insert([ids, files, texts, embeddings])
+        results = ses.text_clt.insert([ids, contests, texts, embeddings])
         print(f'成功插入 {results.insert_count} 条记录到集合 {ses.text_clt.name}')
     ses.text_clt.flush()
 
 
 def insert_data(file_names: list[str], file_paths: list[str]):
-    insert_file_clt(file_names)
+    insert_contest_clt(file_names)
     insert_text_clt(file_names, file_paths)
 
 
-def update_file_clt(file_names: list[str]):
+def update_contest_clt(file_names: list[str]):
     date = int(time())
     chunk_size = ses.chunk_size
     chunk_overlap = ses.chunk_overlap
     n = len(file_names)
-    ses.file_clt.load()
-    results = ses.file_clt.insert([file_names, [date] * n, [chunk_size] * n, [chunk_overlap] * n, np.zeros((n, 1))])
-    print(f'成功更新 {results.insert_count} 条记录到集合 {ses.file_clt.name}')
-    ses.file_clt.flush()
+    ids, contests = [], []
+    for x in file_names:
+        x = x.split('_')
+        ids.append(int(x[0]))
+        contests.append(x[1][:-4])
+    ses.contest_clt.load()
+    results = ses.contest_clt.insert([ids, contests, [date] * n,
+                                     [chunk_size] * n, [chunk_overlap] * n, np.zeros((n, 1))])
+    print(f'成功更新 {results.insert_count} 条记录到集合 {ses.contest_clt.name}')
+    ses.contest_clt.flush()
 
 
 def update_text_clt(file_name: str, file_path: str):
     all_docs = load_documents([file_name], [file_path])
     split_docs = split_documents(all_docs)
-    texts = [f"《{file_name.split('.')[0]}》：{doc.page_content}" for doc in split_docs]
+    contest = file_name.split('_')[1][:-4]
+    texts = [f"《{contest}》：{doc.page_content}" for doc in split_docs]
     new_ids = [hash_string(text) for text in texts]
     id2text = {id: text for id, text in zip(new_ids, texts)}
     new_ids = set(new_ids)
     ses.text_clt.load()
-    results = ses.text_clt.query(expr=f'file == "{file_name}"', output_fields=['id'])
+    results = ses.text_clt.query(expr=f'contest == "{contest}"', output_fields=['id'])
     pre_ids = set([res['id'] for res in results])
     del_ids = list(pre_ids - new_ids)  # 删除更新后不存在的记录
     add_ids = list(new_ids - pre_ids)  # 添加更新后新增的记录
@@ -184,32 +197,34 @@ def update_text_clt(file_name: str, file_path: str):
     n = len(add_ids)
     if n == 0:
         return
-    files = [file_name] * n
+    contests = [contest] * n
     texts = [id2text[id] for id in add_ids]
     for i in range(0, n, emb_size):
         j = i + emb_size
         embeddings = get_text_embeddings(texts[i:j])
-        results = ses.text_clt.insert([add_ids[i:j], files[i:j], texts[i:j], embeddings])
+        results = ses.text_clt.insert([add_ids[i:j], contests[i:j], texts[i:j], embeddings])
         print(f'成功插入 {results.insert_count} 条记录到集合 {ses.text_clt.name}')
     ses.text_clt.flush()
 
 
 def update_data(file_names: list[str], file_paths: list[str]):
-    update_file_clt(file_names)
+    update_contest_clt(file_names)
     for name, path in zip(file_names, file_paths):
         update_text_clt(name, path)
 
 
-def delete_file_clt(file_names: list[str]):
-    ses.file_clt.load()
-    results = ses.file_clt.delete(expr=f'file in {file_names}')
-    print(f'成功删除 {results.delete_count} 条记录从集合 {ses.file_clt.name}')
-    ses.file_clt.flush()
+def delete_contest_clt(contests: list[str]):
+    ses.contest_clt.load()
+    results = ses.contest_clt.query(expr=f'contest in {contests}', output_fields=['id'])
+    ids = [res['id'] for res in results]
+    results = ses.contest_clt.delete(expr=f'id in {ids}')
+    print(f'成功删除 {results.delete_count} 条记录从集合 {ses.contest_clt.name}')
+    ses.contest_clt.flush()
 
 
-def delete_text_clt(file_names: list[str]):
+def delete_text_clt(contests: list[str]):
     ses.text_clt.load()
-    results = ses.text_clt.query(expr=f'file in {file_names}', output_fields=['id'])
+    results = ses.text_clt.query(expr=f'contest in {contests}', output_fields=['id'])
     ids = [res['id'] for res in results]
     results = ses.text_clt.delete(expr=f'id in {ids}')
     print(f'成功删除 {results.delete_count} 条记录从集合 {ses.text_clt.name}')
@@ -217,14 +232,17 @@ def delete_text_clt(file_names: list[str]):
 
 
 def delete_data(file_names: list[str]):
-    delete_file_clt(file_names)
-    delete_text_clt(file_names)
+    contests = [x.split('_')[1][:-4] for x in file_names]
+    delete_contest_clt(contests)
+    delete_text_clt(contests)
 
 
 def clear_collection():
-    ses.file_clt.drop()
-    ses.text_clt.drop()
-    ses.file_clt = create_file_clt()
+    collections = utility.list_collections()
+    for name in collections:
+        utility.drop_collection(name)
+        print(f"已删除 Collection: {name}")
+    ses.contest_clt = create_contest_clt()
     ses.text_clt = create_text_clt()
-    ses.file_clt.flush()
+    ses.contest_clt.flush()
     ses.text_clt.flush()

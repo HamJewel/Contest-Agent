@@ -1,6 +1,6 @@
 from ui.rag import *
 
-empty_table = pd.DataFrame(columns=['编号', '添加日期', '文件名称', '文本段长度', '段重叠长度'])
+empty_table = pd.DataFrame(columns=['编号', '添加日期', '竞赛名称', '文本段长度', '段重叠长度'])
 
 
 def welcome():
@@ -58,15 +58,15 @@ def welcome():
 
 def update_table():
     global data_holder
-    ses.file_clt.load()
-    results = ses.file_clt.query(expr='date > 0', output_fields=['date', 'file', 'chunk_size', 'chunk_overlap'])
+    ses.contest_clt.load()
+    results = ses.contest_clt.query(expr='id >= 0',
+                                    output_fields=['id', 'date', 'contest', 'chunk_size', 'chunk_overlap'])
     if len(results) == 0:
         ses.table = empty_table
     else:
-        df = pd.DataFrame(results, columns=['date', 'file', 'chunk_size', 'chunk_overlap'])
+        df = pd.DataFrame(results, columns=['id', 'date', 'contest', 'chunk_size', 'chunk_overlap'])
         df['date'] = df['date'].apply(lambda x: datetime.fromtimestamp(x, tz=zone).strftime("%Y-%m-%d %H:%M:%S"))
-        df.columns = ['添加日期', '文件名称', '文本段长度', '段重叠长度']
-        df.insert(0, '编号', np.arange(1, len(df) + 1))
+        df.columns = ['编号', '添加日期', '竞赛名称', '文本段长度', '段重叠长度']
         ses.table = df
     data_holder.dataframe(ses.table, hide_index=True)
 
@@ -79,7 +79,7 @@ def init_state():
         flag += 1
     else:
         e1.warning('未连接数据库', icon='⚠️')
-    if 'file_clt' in ses and 'text_clt' in ses:
+    if 'contest_clt' in ses and 'text_clt' in ses:
         e2.success('已获取数据', icon='✅')
         flag += 1
     else:
@@ -99,7 +99,7 @@ def init_state():
         e1.empty()
         e1.success('已连接数据库', icon='✅')
         e2.info('获取数据中...', icon='⏳')
-        ses.file_clt = create_file_clt()
+        ses.contest_clt = create_file_clt()
         ses.text_clt = create_text_clt()
         e2.empty()
         e2.success('已获取数据', icon='✅')
