@@ -138,7 +138,7 @@ col3, col4 = col2.columns([1, 1])
 insert = col3.button('添加文件', type='primary', icon='🗃️', disabled=not fu, use_container_width=True)
 update = col4.button('更新文件', type='primary', icon='📝', disabled=not fu, use_container_width=True)
 col2.divider()
-del_names = col2.multiselect('**选择要删除的文件**', ses.table['文件名称'], disabled=ses.table.empty)
+del_names = col2.multiselect('**选择要删除的文件**', ses.table['竞赛名称'], disabled=ses.table.empty)
 delete = col2.button('删除文件', type='primary', icon='🗑️', disabled=len(del_names) == 0, use_container_width=True)
 clear = col2.button('清空数据库', type='primary', icon='🧹', disabled=ses.table.empty, use_container_width=True)
 
