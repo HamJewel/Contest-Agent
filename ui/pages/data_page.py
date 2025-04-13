@@ -133,7 +133,7 @@ col1.write('**已添加文件**')
 data_holder = col1.empty()
 update_table()
 
-fu = col2.file_uploader('📤**上传文件**', ['pdf', 'txt', 'docx'], accept_multiple_files=True)
+fu = col2.file_uploader('📤**上传文件**', file_type, accept_multiple_files=True)
 col3, col4 = col2.columns([1, 1])
 insert = col3.button('添加文件', type='primary', icon='🗃️', disabled=not fu, use_container_width=True)
 update = col4.button('更新文件', type='primary', icon='📝', disabled=not fu, use_container_width=True)
