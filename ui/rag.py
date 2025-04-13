@@ -114,8 +114,8 @@ def insert_contest_clt(file_names: list[str]):
     chunk_overlap = ses.chunk_overlap
     id2contest = {}
     for x in file_names:
-        x = x.split('_')
-        id2contest[int(x[0])] = x[1][:-4]
+        x = re.split(r'[_.]', x)
+        id2contest[int(x[0])] = x[1]
     new_ids = list(id2contest)
     ses.contest_clt.load()
     results = ses.contest_clt.query(expr=f'id in {new_ids}', output_fields=['id'])
@@ -133,7 +133,7 @@ def insert_contest_clt(file_names: list[str]):
 def insert_text_clt(file_names: list[str], file_paths: list[str]):
     all_docs = load_documents(file_names, file_paths)
     split_docs = split_documents(all_docs)
-    contests = [doc.metadata['file_name'].split('_')[1][:-4] for doc in split_docs]
+    contests = [re.split(r'[_.]', doc.metadata['file_name'])[1] for doc in split_docs]
     texts = [f"《{contest}》：{doc.page_content.strip(sep_str)}" for contest, doc in zip(contests, split_docs)]
     new_ids = [hash_string(text) for text in texts]
     id2info = {new_ids[i]: [contests[i], texts[i]] for i in range(len(new_ids))}
@@ -166,9 +166,9 @@ def update_contest_clt(file_names: list[str]):
     n = len(file_names)
     ids, contests = [], []
     for x in file_names:
-        x = x.split('_')
+        x = re.split(r'[_.]', x)
         ids.append(int(x[0]))
-        contests.append(x[1][:-4])
+        contests.append(x[1])
     ses.contest_clt.load()
     results = ses.contest_clt.insert([ids, contests, [date] * n,
                                      [chunk_size] * n, [chunk_overlap] * n, np.zeros((n, 1))])
@@ -179,7 +179,7 @@ def update_contest_clt(file_names: list[str]):
 def update_text_clt(file_name: str, file_path: str):
     all_docs = load_documents([file_name], [file_path])
     split_docs = split_documents(all_docs)
-    contest = file_name.split('_')[1][:-4]
+    contest = re.split(r'[_.]', file_name)[1]
     texts = [f"《{contest}》：{doc.page_content.strip(sep_str)}" for doc in split_docs]
     new_ids = [hash_string(text) for text in texts]
     id2text = {id: text for id, text in zip(new_ids, texts)}
