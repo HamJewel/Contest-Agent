@@ -104,7 +104,7 @@ def retrieval_texts(query, max_ret=5, n_probe=10):
         output_fields=['text'],
         consistency_level='Strong'
     )
-    ret_texts = [res.entity.get('text').strip(separators) for res in results[0]]
+    ret_texts = [res.entity.get('text').strip(''.join(separators)) for res in results[0]]
     return ret_texts
 
 
