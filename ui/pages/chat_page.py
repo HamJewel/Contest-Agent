@@ -104,7 +104,7 @@ write_messages()
 welcome_holder = st.empty()
 if len(ses.messages) == 0:
     with welcome_holder:
-        welcome('🤖', '我是您的智能客服，任何问题都可以咨询我✨')
+        get_welcome_style('🤖', '我是您的智能客服，任何问题都可以咨询我✨')
 
 tips = '请输入你的问题' if ses.connected else '请先初始化数据库'
 ses.query = st.chat_input(tips, accept_file=True, file_type=file_type, disabled=not ses.connected)

@@ -55,19 +55,13 @@ def init_state():
 
 
 with st.sidebar:
-    if st.button('清理临时文件', type='primary', icon='♻️', use_container_width=True):
-        st.toast('**开始清理临时文件**', icon='🚀')
-        if os.path.exists(temp_path):
-            shutil.rmtree(temp_path)
-        os.makedirs(temp_path)
-        st.toast('**临时文件清理完成**', icon='🎉')
     init = st.button('初始化数据库', type='primary', icon='🔗', use_container_width=True)
     status = st.status('初始化状态', expanded=True, state='running')
     e1 = status.empty()
     e2 = status.empty()
 
 if not init_state():
-    welcome('🔗', '请先初始化数据库🗃️')
+    get_welcome_style('🔗', '请先初始化数据库🗃️')
     status.update(expanded=True, state='error')
     st.stop()
 status.update(expanded=False, state='complete')
@@ -87,7 +81,7 @@ update = col4.button('更新文件', type='primary', icon='📝', disabled=not f
 col2.divider()
 del_names = col2.multiselect('**选择要删除的文件**', ses.table['竞赛名称'], disabled=ses.table.empty)
 delete = col2.button('删除文件', type='primary', icon='🗑️', disabled=len(del_names) == 0, use_container_width=True)
-clear = col2.button('清空数据库', type='primary', icon='🧹', disabled=ses.table.empty, use_container_width=True)
+clear = col2.button('清空数据库', type='primary', icon='♻️', disabled=ses.table.empty, use_container_width=True)
 
 if clear:
     st.toast('**开始清空数据库**', icon='🚀')

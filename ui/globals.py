@@ -18,7 +18,9 @@ import shutil
 import os
 import re
 temp_path = 'temp'
-os.makedirs(temp_path, exist_ok=True)
+if os.path.exists(temp_path):
+    shutil.rmtree(temp_path)
+os.makedirs(temp_path)
 zone = ZoneInfo('Asia/Shanghai')
 cache_keys = ['messages', 'dialog', 'knowledge', 'dialogs', 'connected', 'contest_clt',
               'text_clt', 'table', 'chunk_size', 'chunk_overlap', 'llm', 'max_ret', 'n_probe']
@@ -87,7 +89,7 @@ def get_chat_completions(model, request):
     )
 
 
-def welcome(emoji, text):
+def get_welcome_style(emoji, text):
     st.markdown(f"""
     <style>
         @keyframes floatIn {{
