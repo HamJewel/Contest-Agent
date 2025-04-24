@@ -22,7 +22,7 @@ os.makedirs(temp_path, exist_ok=True)
 zone = ZoneInfo('Asia/Shanghai')
 cache_keys = ['messages', 'dialog', 'knowledge', 'dialogs', 'connected', 'contest_clt',
               'text_clt', 'table', 'chunk_size', 'chunk_overlap', 'llm', 'max_ret', 'n_probe']
-LLM_names = ['DeepSeek-V3', 'DeepSeek-R1(支持推理)', 'QwQ-32B(支持推理)', 'Qwen2.5-72B', 'Llama3.3-70B', 'Llama3.1-8B']
+LLM_names = ['QwQ-32B(支持推理)', 'Qwen2.5-72B', 'DeepSeek-V3', 'DeepSeek-R1(支持推理)', 'Llama3.3-70B', 'Llama3.1-8B']
 LLMs = {
     'QwQ-32B(支持推理)': {'model': 'Qwen/QwQ-32B', 'reasoning': True},
     'Qwen2.5-72B': {'model': 'Qwen/Qwen2.5-72B-Instruct', 'reasoning': False},
