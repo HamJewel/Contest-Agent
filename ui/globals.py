@@ -24,10 +24,10 @@ cache_keys = ['messages', 'dialog', 'knowledge', 'dialogs', 'connected', 'contes
               'text_clt', 'table', 'chunk_size', 'chunk_overlap', 'llm', 'max_ret', 'n_probe']
 LLM_names = ['DeepSeek-V3', 'DeepSeek-R1(支持推理)', 'QwQ-32B(支持推理)', 'Qwen2.5-72B', 'Llama3.3-70B', 'Llama3.1-8B']
 LLMs = {
-    'DeepSeek-V3': {'model': 'deepseek-ai/DeepSeek-V3-0324', 'reasoning': False},
-    'DeepSeek-R1(支持推理)': {'name': 'DeepSeek-R1', 'model': 'deepseek-ai/DeepSeek-R1', 'reasoning': True},
     'QwQ-32B(支持推理)': {'model': 'Qwen/QwQ-32B', 'reasoning': True},
     'Qwen2.5-72B': {'model': 'Qwen/Qwen2.5-72B-Instruct', 'reasoning': False},
+    'DeepSeek-V3': {'model': 'deepseek-ai/DeepSeek-V3-0324', 'reasoning': False},
+    'DeepSeek-R1(支持推理)': {'name': 'DeepSeek-R1', 'model': 'deepseek-ai/DeepSeek-R1', 'reasoning': True},
     'Llama3.3-70B': {'model': 'LLM-Research/Llama-3.3-70B-Instruct', 'reasoning': False},
     'Llama3.1-8B': {'model': 'LLM-Research/Meta-Llama-3.1-8B-Instruct', 'reasoning': False}
 }
